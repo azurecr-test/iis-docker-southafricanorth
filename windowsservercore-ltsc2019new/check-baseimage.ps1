@@ -7,6 +7,21 @@ $currUBR=$current.UBR
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls -bor 
 [Net.SecurityProtocolType]::Tls11 -bor [Net.SecurityProtocolType]::Tls12
 
+try
+{
+    Invoke-WebRequest -UseBasicParsing https://mcr.microsoft.com/v2/windows/servercore/tags/list
+}
+catch [System.Net.WebException]
+{
+  $ex =  $PSItem.Exception
+  Write-Host "Error is " $ex.Message
+  
+  foreach($key in $ex.Response.Headers.Keys)
+  {
+     Write-Host "Response Header " $key "::" $ex.Response.Headers[$key]     
+  }
+}
+
 # fetch the maximum version number from MCR by filtering and sorting the JSON result
 $prefix="$($current.CurrentMajorVersionNumber).$($current.CurrentMinorVersionNumber).$($current.CurrentBuildNumber)."
 $json=$(Invoke-WebRequest -UseBasicParsing https://mcr.microsoft.com/v2/windows/servercore/tags/list | ConvertFrom-Json)
